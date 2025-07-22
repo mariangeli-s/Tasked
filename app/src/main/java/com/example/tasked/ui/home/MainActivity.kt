@@ -16,6 +16,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tasked.ui.auth.LoginActivity
+import com.example.tasked.ui.home.composable.BossDashboardScreen // Importa la nueva pantalla de jefe
+import com.example.tasked.ui.home.composable.EmployeeDashboardScreen // Importa la nueva pantalla de empleado
 import com.example.tasked.ui.theme.TaskedTheme
 import com.example.tasked.utils.SharedPreferencesManager
 
@@ -36,14 +38,50 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             TaskedTheme {
-                MainScreen(
-                    username = sharedPreferencesManager.getUsername() ?: "Usuario",
-                    role = sharedPreferencesManager.getUserRole() ?: "Desconocido",
-                    onLogout = {
-                        sharedPreferencesManager.clearAuthData()
-                        navigateToLogin()
+                val username = sharedPreferencesManager.getUsername() ?: "Usuario"
+                val role = sharedPreferencesManager.getUserRole() ?: "Desconocido"
+
+                // Decide qué pantalla de dashboard mostrar según el rol
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    when (role) {
+                        "boss" -> BossDashboardScreen(
+                            username = username,
+                            onLogout = {
+                                sharedPreferencesManager.clearAuthData()
+                                navigateToLogin()
+                            }
+                            // Aquí puedes pasar más callbacks o ViewModels si es necesario
+                        )
+                        "employee" -> EmployeeDashboardScreen(
+                            username = username,
+                            onLogout = {
+                                sharedPreferencesManager.clearAuthData()
+                                navigateToLogin()
+                            }
+                            // Aquí puedes pasar más callbacks o ViewModels si es necesario
+                        )
+                        else -> {
+                            // En caso de un rol desconocido o por defecto
+                            Column(
+                                modifier = Modifier.fillMaxSize().padding(16.dp),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text("Rol desconocido: $role", fontSize = 20.sp)
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Button(onClick = {
+                                    sharedPreferencesManager.clearAuthData()
+                                    navigateToLogin()
+                                }) {
+                                    Text("Cerrar Sesión")
+                                }
+                            }
+                        }
                     }
-                )
+                }
             }
         }
     }
@@ -53,46 +91,6 @@ class MainActivity : ComponentActivity() {
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
-    }
-}
-
-@Composable
-fun MainScreen(username: String, role: String, onLogout: () -> Unit) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Bienvenido, $username!",
-                fontSize = 24.sp,
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            Text(
-                text = "Tu rol: $role",
-                fontSize = 18.sp,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(bottom = 32.dp)
-            )
-
-            Button(
-                onClick = onLogout,
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .height(50.dp)
-            ) {
-                Text("Cerrar Sesión", fontSize = 18.sp)
-            }
-            // Aquí irían los botones o composables para la gestión de tareas
-        }
     }
 }
 
