@@ -1,6 +1,7 @@
 package com.example.tasked.data.repository
 
 import com.example.tasked.data.model.CreateTaskRequest
+import com.example.tasked.data.model.UpdateTaskStatusRequest
 import com.example.tasked.data.model.Task
 import com.example.tasked.data.model.User
 import com.example.tasked.data.remote.ApiService
@@ -26,5 +27,10 @@ class TaskRepository(private val apiService: ApiService) {
 
     suspend fun getUsers(token: String): Response<List<User>> {
         return apiService.getUsers("Bearer $token")
+    }
+    // Nueva función para actualizar el estado de una tarea
+    suspend fun updateTaskStatus(token: String, taskId: String, status: String): Response<Task> {
+        val request = UpdateTaskStatusRequest(status)
+        return apiService.updateTaskStatus("Bearer $token", taskId, request)
     }
 }

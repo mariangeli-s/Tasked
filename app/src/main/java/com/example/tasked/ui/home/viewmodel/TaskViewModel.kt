@@ -23,6 +23,9 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
     private val _createTaskResult = MutableLiveData<Resource<Task>>()
     val createTaskResult: LiveData<Resource<Task>> = _createTaskResult
 
+    private val _updateTaskStatusResult = MutableLiveData<Resource<Task>>()
+    val updateTaskStatusResult: LiveData<Resource<Task>> = _updateTaskStatusResult
+
     private val _users = MutableLiveData<Resource<List<User>>>()
     val users: LiveData<Resource<List<User>>> = _users
 
@@ -66,9 +69,9 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
                 val response = taskRepository.createTask(token, request)
                 if (response.isSuccessful && response.body() != null) {
                     _createTaskResult.value = Resource.Success(response.body()!!)
-                    // Opcional: Refrescar listas de tareas después de crear una
-                    fetchMyTasks(token)
-                    if (assignedTo != null) {
+                    // Refrescar la lista de tareas relevante después de crear una
+                    fetchMyTasks(token) // Siempre refrescar mis tareas
+                    if (assignedTo != null) { // Si se asignó, refrescar las asignadas por mí
                         fetchAssignedTasksByMe(token)
                     }
                 } else {
@@ -76,6 +79,25 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
                 }
             } catch (e: Exception) {
                 _createTaskResult.value = Resource.Error("Error de red: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    fun markTaskAsCompleted(token: String, taskId: String) {
+        _updateTaskStatusResult.value = Resource.Loading()
+        viewModelScope.launch {
+            try {
+                val response = taskRepository.updateTaskStatus(token, taskId, "completed")
+                if (response.isSuccessful && response.body() != null) {
+                    _updateTaskStatusResult.value = Resource.Success(response.body()!!)
+                    // Refrescar ambas listas después de una actualización para que el cambio se vea
+                    fetchMyTasks(token)
+                    fetchAssignedTasksByMe(token)
+                } else {
+                    _updateTaskStatusResult.value = Resource.Error(response.message() ?: "Error al marcar tarea como completada")
+                }
+            } catch (e: Exception) {
+                _updateTaskStatusResult.value = Resource.Error("Error de red: ${e.localizedMessage}")
             }
         }
     }

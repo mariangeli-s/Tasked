@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -22,6 +23,7 @@ import com.example.tasked.data.repository.UserRepository
 import com.example.tasked.data.remote.RetrofitClient
 import com.example.tasked.ui.auth.viewmodel.LoginViewModel
 import com.example.tasked.ui.auth.viewmodel.LoginViewModelFactory
+import com.example.tasked.ui.theme.TaskedTheme
 import com.example.tasked.utils.Resource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -127,3 +129,15 @@ fun LoginScreen(
         }
     }
 }
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun LoginScreenPreview() {
+    TaskedTheme {
+        LoginScreen(
+            onLoginSuccess = {},
+            onNavigateToRegister = {}
+        )
+    }
+}
+

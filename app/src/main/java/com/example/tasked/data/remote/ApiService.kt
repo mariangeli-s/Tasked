@@ -1,15 +1,21 @@
 package com.example.tasked.data.remote
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.tasked.data.model.AuthResponse
 import com.example.tasked.data.model.LoginRequest
 import com.example.tasked.data.model.RegisterRequest
 import com.example.tasked.data.model.Task
 import com.example.tasked.data.model.CreateTaskRequest
+import com.example.tasked.data.model.UpdateTaskStatusRequest
 import com.example.tasked.data.model.User
+import com.example.tasked.ui.auth.composable.LoginScreen
+import com.example.tasked.ui.theme.TaskedTheme
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Path
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Query
@@ -50,4 +56,12 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Query("role") role: String = "employee" // Podrías filtrar por rol si tu API lo soporta
     ): Response<List<User>> // Reutilizamos la clase User para la lista de usuarios
+
+    // Nuevo endpoint para actualizar el estado de una tarea
+    @PATCH("tasks/{taskId}") // Ajusta la ruta si tu API usa otra convención
+    suspend fun updateTaskStatus(
+        @Header("Authorization") token: String,
+        @Path("taskId") taskId: String,
+        @Body request: UpdateTaskStatusRequest
+    ): Response<Task> // Podría devolver la tarea actualizada o solo un éxito
 }

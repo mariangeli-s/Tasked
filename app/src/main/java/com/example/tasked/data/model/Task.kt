@@ -15,3 +15,8 @@ data class CreateTaskRequest(
     val description: String,
     val assignedTo: String? = null // Opcional, solo para jefes
 )
+
+// Nueva clase para la petición de actualización de estado
+data class UpdateTaskStatusRequest(
+    val status: String // Por ejemplo, "completed"
+)

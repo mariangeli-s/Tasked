@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -22,6 +23,7 @@ import com.example.tasked.data.remote.RetrofitClient
 import com.example.tasked.data.repository.TaskRepository
 import com.example.tasked.ui.home.viewmodel.TaskViewModel
 import com.example.tasked.ui.home.viewmodel.TaskViewModelFactory
+import com.example.tasked.ui.theme.TaskedTheme
 import com.example.tasked.utils.Resource
 import com.example.tasked.utils.SharedPreferencesManager
 
@@ -41,7 +43,8 @@ fun CreateTaskDialog(
 
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var assignedToUser: String? by remember { mutableStateOf(null) } // ID del usuario asignado
+    var assignedToUserId: String? by remember { mutableStateOf(null) } // ID del usuario asignado
+    var assignedToUsername: String? by remember { mutableStateOf(null) } // Nombre del usuario asignado para mostrar
 
     val createTaskResult by taskViewModel.createTaskResult.observeAsState()
     val usersResource by taskViewModel.users.observeAsState()
@@ -109,7 +112,7 @@ fun CreateTaskDialog(
 
                 if (isBoss) {
                     Text(
-                        text = "Asignar a (opcional):",
+                        text = "Asignar a:",
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
@@ -124,15 +127,18 @@ fun CreateTaskDialog(
                                     Modifier
                                         .fillMaxWidth()
                                         .selectable(
-                                            selected = assignedToUser == null,
-                                            onClick = { assignedToUser = null },
+                                            selected = assignedToUserId == null,
+                                            onClick = {
+                                                assignedToUserId = null
+                                                assignedToUsername = null
+                                            },
                                             role = Role.RadioButton
                                         )
                                         .padding(vertical = 8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     RadioButton(
-                                        selected = assignedToUser == null,
+                                        selected = assignedToUserId == null,
                                         onClick = null // null because the row handles the click
                                     )
                                     Text(
@@ -154,15 +160,18 @@ fun CreateTaskDialog(
                                             Modifier
                                                 .fillMaxWidth()
                                                 .selectable(
-                                                    selected = user.id == assignedToUser,
-                                                    onClick = { assignedToUser = user.id },
+                                                    selected = user.id == assignedToUserId,
+                                                    onClick = {
+                                                        assignedToUserId = user.id
+                                                        assignedToUsername = user.username
+                                                    },
                                                     role = Role.RadioButton
                                                 )
                                                 .padding(vertical = 8.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             RadioButton(
-                                                selected = user.id == assignedToUser,
+                                                selected = user.id == assignedToUserId,
                                                 onClick = null // null because the row handles the click
                                             )
                                             Text(
@@ -174,6 +183,18 @@ fun CreateTaskDialog(
                                     }
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
+
+                                // Campo de "correo del empleado" (mostrar el nombre de usuario seleccionado)
+                                // Nota: El requisito era "correo", pero el modelo User solo tiene username.
+                                // Si tu backend devuelve el correo, úsalo aquí. Por ahora, mostraré el username.
+                                OutlinedTextField(
+                                    value = assignedToUsername ?: "",
+                                    onValueChange = { /* No se permite edición directa */ },
+                                    label = { Text("Empleado asignado (Nombre)") },
+                                    readOnly = true, // No editable directamente
+                                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                                )
+
                             } else {
                                 Text("No hay empleados disponibles para asignar.", modifier = Modifier.padding(bottom = 16.dp))
                             }
@@ -186,7 +207,7 @@ fun CreateTaskDialog(
                 Button(
                     onClick = {
                         if (title.isNotEmpty() && description.isNotEmpty()) {
-                            taskViewModel.createTask(authToken, title, description, assignedToUser)
+                            taskViewModel.createTask(authToken, title, description, assignedToUserId)
                         } else {
                             Toast.makeText(context, "Por favor, completa título y descripción", Toast.LENGTH_SHORT).show()
                         }
@@ -202,5 +223,17 @@ fun CreateTaskDialog(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun CreateTaskDialogPreview() {
+    TaskedTheme {
+        CreateTaskDialog(
+            onDismiss = {},
+            onTaskCreated = {},
+            isBoss = true
+        )
     }
 }
