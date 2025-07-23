@@ -15,11 +15,31 @@ class RegisterViewModel(private val userRepository: UserRepository) : ViewModel(
     private val _registerResult = MutableLiveData<Resource<AuthResponse>>()
     val registerResult: LiveData<Resource<AuthResponse>> = _registerResult
 
-    fun register(username: String, password: String) {
+    fun register(
+        username: String,
+        password: String,
+        firstName: String?, // Nuevo
+        lastName: String?, // Nuevo
+        email: String, // Nuevo
+        phone: String?, // Nuevo
+        address: String?, // Nuevo
+        age: Int?, // Nuevo
+        dateOfBirth: String? // Nuevo
+    ) {
         _registerResult.value = Resource.Loading()
         viewModelScope.launch {
             try {
-                val request = RegisterRequest(username, password)
+                val request = RegisterRequest(
+                    username,
+                    password,
+                    firstName,
+                    lastName,
+                    email,
+                    phone,
+                    address,
+                    age,
+                    dateOfBirth
+                )
                 val response = userRepository.register(request)
                 if (response.isSuccessful && response.body() != null) {
                     _registerResult.value = Resource.Success(response.body()!!)

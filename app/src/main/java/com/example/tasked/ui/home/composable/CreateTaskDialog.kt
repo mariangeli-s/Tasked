@@ -233,7 +233,7 @@ fun CreateTaskDialogPreview() {
         CreateTaskDialog(
             onDismiss = {},
             onTaskCreated = {},
-            isBoss = true
+            isBoss = false
         )
     }
 }

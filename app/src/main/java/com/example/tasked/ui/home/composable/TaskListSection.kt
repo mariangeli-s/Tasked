@@ -153,3 +153,23 @@ fun TaskItem(task: Task, currentUserId: String?, onMarkAsCompleted: (String) -> 
         }
     }
 }
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun TaskItemPreview() {
+    TaskedTheme {
+        TaskItem(
+            task = Task(
+                id = "1",
+                title = "Ejemplo de Tarea",
+                description = "Descripción de la tarea",
+                status = "pendiente",
+                createdBy = "usuario123",
+                assignedTo = "empleado456"
+                // Otros campos de la tarea
+            ),
+            currentUserId = "usuario123",
+            onMarkAsCompleted = {}
+        )
+    }
+}
