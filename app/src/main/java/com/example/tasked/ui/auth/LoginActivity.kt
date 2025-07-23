@@ -9,6 +9,7 @@ import com.example.tasked.ui.home.MainActivity
 import com.example.tasked.data.remote.RetrofitClient
 import com.example.tasked.data.repository.UserRepository
 import com.example.tasked.ui.auth.composable.LoginScreen
+import com.example.tasked.ui.auth.viewmodel.LoginViewModel
 import com.example.tasked.ui.auth.viewmodel.LoginViewModelFactory
 import com.example.tasked.ui.theme.TaskedTheme // Asegúrate de que tu tema esté definido aquí
 import com.example.tasked.utils.SharedPreferencesManager
@@ -30,7 +31,7 @@ class LoginActivity : ComponentActivity() {
 
         setContent {
             TaskedTheme {
-                val loginViewModel: LoginViewModelFactory = viewModel(
+                val loginViewModel: LoginViewModel = viewModel(
                     factory = LoginViewModelFactory(UserRepository(RetrofitClient.apiService))
                 )
                 LoginScreen(

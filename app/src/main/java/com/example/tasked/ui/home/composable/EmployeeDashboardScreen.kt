@@ -2,8 +2,6 @@ package com.example.tasked.ui.home.composable
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.List
@@ -29,7 +27,7 @@ import com.example.tasked.utils.SharedPreferencesManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BossDashboardScreen(
+fun EmployeeDashboardScreen(
     username: String,
     onLogout: () -> Unit,
     taskViewModel: TaskViewModel = viewModel(
@@ -42,19 +40,15 @@ fun BossDashboardScreen(
 
     // Estados para controlar qué contenido mostrar
     var showCreateTaskDialog by remember { mutableStateOf(false) }
-    var currentView by remember { mutableStateOf<BossView>(BossView.MyTasks) }
+    var currentView by remember { mutableStateOf<EmployeeView>(EmployeeView.MyTasks) }
 
     // Observa las tareas del ViewModel
     val myTasksResource by taskViewModel.myTasks.observeAsState()
-    val assignedTasksResource by taskViewModel.assignedTasksByMe.observeAsState()
 
     // Cargar tareas al iniciar y cuando la vista cambia
     LaunchedEffect(currentView, authToken) {
         if (authToken.isNotEmpty()) {
-            when (currentView) {
-                BossView.MyTasks -> taskViewModel.fetchMyTasks(authToken)
-                BossView.AssignedTasks -> taskViewModel.fetchAssignedTasksByMe(authToken)
-            }
+            taskViewModel.fetchMyTasks(authToken)
         } else {
             Toast.makeText(context, "Token de autenticación no encontrado.", Toast.LENGTH_SHORT).show()
             onLogout() // Redirigir a login si no hay token
@@ -64,7 +58,7 @@ fun BossDashboardScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Dashboard de Jefe - Tasked") },
+                title = { Text("Dashboard de Empleado - Tasked") },
                 actions = {
                     IconButton(onClick = onLogout) {
                         Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Cerrar Sesión")
@@ -74,7 +68,7 @@ fun BossDashboardScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showCreateTaskDialog = true }) {
-                Icon(Icons.Filled.Add, "Crear nueva tarea")
+                Icon(Icons.Filled.Add, "Crear nueva tarea personal")
             }
         },
         bottomBar = {
@@ -82,14 +76,8 @@ fun BossDashboardScreen(
                 NavigationBarItem(
                     icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Mis Tareas") },
                     label = { Text("Mis Tareas") },
-                    selected = currentView == BossView.MyTasks,
-                    onClick = { currentView = BossView.MyTasks }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Tareas Asignadas") },
-                    label = { Text("Asignadas") },
-                    selected = currentView == BossView.AssignedTasks,
-                    onClick = { currentView = BossView.AssignedTasks }
+                    selected = currentView == EmployeeView.MyTasks,
+                    onClick = { currentView = EmployeeView.MyTasks }
                 )
             }
         }
@@ -108,18 +96,12 @@ fun BossDashboardScreen(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            when (currentView) {
-                BossView.MyTasks -> TaskListSection(
-                    title = "Mis Tareas Personales",
-                    resource = myTasksResource,
-                    emptyMessage = "No tienes tareas personales. ¡Crea una!"
-                )
-                BossView.AssignedTasks -> TaskListSection(
-                    title = "Tareas Asignadas por Ti",
-                    resource = assignedTasksResource,
-                    emptyMessage = "No has asignado ninguna tarea."
-                )
-            }
+            // Para empleados, siempre mostramos "Mis Tareas" que incluye personales y asignadas
+            TaskListSection(
+                title = "Mis Tareas (Personales y Asignadas)",
+                resource = myTasksResource,
+                emptyMessage = "No tienes tareas. ¡Crea una o espera una asignación!"
+            )
         }
     }
 
@@ -128,20 +110,14 @@ fun BossDashboardScreen(
             onDismiss = { showCreateTaskDialog = false },
             onTaskCreated = {
                 showCreateTaskDialog = false
-                // Refrescar la lista de tareas relevante después de la creación
-                if (currentView == BossView.MyTasks) {
-                    taskViewModel.fetchMyTasks(authToken)
-                } else if (currentView == BossView.AssignedTasks) {
-                    taskViewModel.fetchAssignedTasksByMe(authToken)
-                }
+                taskViewModel.fetchMyTasks(authToken) // Refrescar la lista después de crear
             },
             taskViewModel = taskViewModel,
-            isBoss = true
+            isBoss = false // Los empleados no pueden asignar tareas
         )
     }
 }
 
-private sealed class BossView {
-    object MyTasks : BossView()
-    object AssignedTasks : BossView()
+private sealed class EmployeeView {
+    object MyTasks : EmployeeView()
 }

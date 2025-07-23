@@ -29,7 +29,7 @@ import com.example.tasked.utils.Resource
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
-    LoginViewModel: LoginViewModel = viewModel(
+    loginViewModel: LoginViewModel = viewModel(
         factory = LoginViewModelFactory(UserRepository(RetrofitClient.apiService))
     )
 ) {
@@ -37,7 +37,7 @@ fun LoginScreen(
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    val loginResult by LoginViewModel.loginResult.observeAsState()
+    val loginResult by loginViewModel.loginResult.observeAsState()
 
     // Manejar el resultado del login
 
@@ -102,7 +102,7 @@ fun LoginScreen(
             Button(
                 onClick = {
                     if (username.isNotEmpty() && password.isNotEmpty()) {
-                        LoginViewModel.login(username, password)
+                        loginViewModel.login(username, password)
                     } else {
                         Toast.makeText(context, "Por favor, ingresa usuario y contraseña", Toast.LENGTH_SHORT).show()
                     }
