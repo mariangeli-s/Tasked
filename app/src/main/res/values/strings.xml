@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Tasked</string>
+    <string name="title_activity_login">Iniciar Sesión</string>
+    <string name="title_activity_register">Registrarse</string>
 </resources>
