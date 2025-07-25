@@ -117,37 +117,37 @@ fun CreateTaskDialog(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
+                    // Opción para tarea personal (no asignada)
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = assignedToUserId == null,
+                                onClick = {
+                                    assignedToUserId = null
+                                    assignedToUsername = null
+                                },
+                                role = Role.RadioButton
+                            )
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = assignedToUserId == null,
+                            onClick = null // null because the row handles the click
+                        )
+                        Text(
+                            text = "Tarea personal",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
+
                     when (usersResource) {
                         is Resource.Loading<*> -> CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                         is Resource.Success<*> -> {
                             val users = (usersResource as Resource.Success).data ?: emptyList()
                             if (users.isNotEmpty()) {
-                                // Opción para tarea personal (no asignada)
-                                Row(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .selectable(
-                                            selected = assignedToUserId == null,
-                                            onClick = {
-                                                assignedToUserId = null
-                                                assignedToUsername = null
-                                            },
-                                            role = Role.RadioButton
-                                        )
-                                        .padding(vertical = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    RadioButton(
-                                        selected = assignedToUserId == null,
-                                        onClick = null // null because the row handles the click
-                                    )
-                                    Text(
-                                        text = "Tarea personal (para mí)",
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        modifier = Modifier.padding(start = 8.dp)
-                                    )
-                                }
-
                                 // Lista de usuarios para asignar
                                 LazyColumn(
                                     modifier = Modifier

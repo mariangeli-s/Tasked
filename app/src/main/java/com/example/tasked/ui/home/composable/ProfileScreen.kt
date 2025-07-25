@@ -81,7 +81,7 @@ fun ProfileScreen(
                     ProfileInfoRow(label = "Edad:", value = age?.toString() ?: "N/A") // Nuevo
                     ProfileInfoRow(label = "Fecha de Nacimiento:", value = dateOfBirth) // Nuevo
                     ProfileInfoRow(label = "Rol:", value = role.capitalize())
-                    ProfileInfoRow(label = "ID de Usuario:", value = userId)
+                    //ProfileInfoRow(label = "ID de Usuario:", value = userId)
                 }
             }
 

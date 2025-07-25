@@ -11,26 +11,48 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+// Esquema de color claro
+private val LightColorScheme = lightColorScheme(
+    primary = PrimaryBlue,
+    onPrimary = OnPrimaryLight,
+    secondary = AccentGreen,
+    onSecondary = OnPrimaryLight,
+    tertiary = SoftPurple,
+    onTertiary = OnPrimaryLight,
+    background = BackgroundLight,
+    onBackground = OnSurfaceLight,
+    surface = SurfaceLight,
+    onSurface = OnSurfaceLight,
+    error = ErrorRed,
+    onError = OnError,
+    primaryContainer = LightBlue, // Contenedores con un tono más claro del primario
+    onPrimaryContainer = DarkBlue, // Texto oscuro sobre el contenedor primario claro
+    secondaryContainer = LightGreen, // Contenedores con un tono más claro del secundario
+    onSecondaryContainer = DarkGreen, // Texto oscuro sobre el contenedor secundario claro
+    tertiaryContainer = LightPurple,
+    onTertiaryContainer = DarkPurple
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+// Esquema de color oscuro
+private val DarkColorScheme = darkColorScheme(
+    primary = PrimaryBlue, // Podemos mantener un azul similar o ligeramente diferente en oscuro
+    onPrimary = OnPrimaryDark,
+    secondary = AccentGreen,
+    onSecondary = OnPrimaryDark,
+    tertiary = SoftPurple,
+    onTertiary = OnPrimaryDark,
+    background = BackgroundDark,
+    onBackground = OnSurfaceDark,
+    surface = SurfaceDark,
+    onSurface = OnSurfaceDark,
+    error = ErrorRed,
+    onError = OnError,
+    primaryContainer = DarkBlue, // Contenedores con un tono más oscuro del primario
+    onPrimaryContainer = LightBlue,
+    secondaryContainer = DarkGreen,
+    onSecondaryContainer = LightGreen,
+    tertiaryContainer = DarkPurple,
+    onTertiaryContainer = LightPurple
 )
 
 @Composable
