@@ -109,7 +109,7 @@ fun BossDashboardScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Bienvenido, $username!",
+                text = "Hola, $username!",
                 fontSize = 24.sp,
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(bottom = 16.dp)

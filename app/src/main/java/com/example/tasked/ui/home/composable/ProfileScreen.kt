@@ -10,9 +10,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+//import androidx.compose.ui.unit.sp
 import com.example.tasked.ui.theme.TaskedTheme
 import com.example.tasked.utils.SharedPreferencesManager
 
@@ -33,7 +34,7 @@ fun ProfileScreen(
     val email = sharedPreferencesManager.getEmail() ?: "N/A" // Nuevo
     val phone = sharedPreferencesManager.getPhone() ?: "N/A" // Nuevo
     val address = sharedPreferencesManager.getAddress() ?: "N/A" // Nuevo
-    val age = sharedPreferencesManager.getAge() // Nuevo
+    val age = sharedPreferencesManager.getAge()?.toString() ?: "N/A" // Nuevo
     val dateOfBirth = sharedPreferencesManager.getDateOfBirth() ?: "N/A" // Nuevo
 
     Scaffold(
@@ -63,7 +64,7 @@ fun ProfileScreen(
             )
 
             Card(
-                modifier = Modifier.fillMaxWidth(0.8f),
+                modifier = Modifier.fillMaxWidth(0.9f), // Un poco más ancho para las dos columnas
                 shape = MaterialTheme.shapes.medium
             ) {
                 Column(
@@ -72,16 +73,92 @@ fun ProfileScreen(
                         .fillMaxWidth(),
                     horizontalAlignment = Alignment.Start
                 ) {
-                    ProfileInfoRow(label = "Nombre de usuario:", value = username)
-                    ProfileInfoRow(label = "Nombre:", value = firstName) // Nuevo
-                    ProfileInfoRow(label = "Apellido:", value = lastName) // Nuevo
-                    ProfileInfoRow(label = "Correo:", value = email) // Nuevo
-                    ProfileInfoRow(label = "Teléfono:", value = phone) // Nuevo
-                    ProfileInfoRow(label = "Dirección:", value = address) // Nuevo
-                    ProfileInfoRow(label = "Edad:", value = age?.toString() ?: "N/A") // Nuevo
-                    ProfileInfoRow(label = "Fecha de Nacimiento:", value = dateOfBirth) // Nuevo
-                    ProfileInfoRow(label = "Rol:", value = role.capitalize())
-                    ProfileInfoRow(label = "ID de Usuario:", value = userId)
+                    // Fila 1: Nombre de usuario y Rol
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        InfoColumn(
+                            label = "Usuario:",
+                            value = username,
+                            modifier = Modifier.weight(1f)
+                        )
+                        InfoColumn(
+                            label = "Rol:",
+                            value = role.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Fila 2: Nombre y Apellido
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        InfoColumn(
+                            label = "Nombre:",
+                            value = firstName,
+                            modifier = Modifier.weight(1f)
+                        )
+                        InfoColumn(
+                            label = "Apellido:",
+                            value = lastName,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Fila 3: Correo y Teléfono
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        InfoColumn(
+                            label = "Correo:",
+                            value = email,
+                            modifier = Modifier.weight(1f)
+                        )
+                        InfoColumn(
+                            label = "Teléfono:",
+                            value = phone,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Fila 4: Dirección y Edad
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        InfoColumn(
+                            label = "Dirección:",
+                            value = address,
+                            modifier = Modifier.weight(1f)
+                        )
+                        InfoColumn(
+                            label = "Edad:",
+                            value = age,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Fila 5: Fecha de Nacimiento
+                    InfoColumn(
+                        label = "Fecha de Nacimiento:",
+                        value = dateOfBirth,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // ID de Usuario
+                    //InfoColumn(
+                    //label = "ID de Usuario:",
+                    //value = userId,
+                    //modifier = Modifier.fillMaxWidth()
+                    //)
                 }
             }
 
@@ -99,16 +176,18 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileInfoRow(label: String, value: String) {
-    Column(modifier = Modifier.padding(bottom = 16.dp)) {
+fun InfoColumn(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
         Text(
             text = label,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(top = 2.dp)
         )
     }
 }
