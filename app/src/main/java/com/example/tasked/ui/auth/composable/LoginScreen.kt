@@ -30,7 +30,7 @@ import com.example.tasked.utils.SharedPreferencesManager
 //import android.content.Intent
 //import com.example.tasked.ui.home.MainActivity
 
-@OptIn(ExperimentalMaterial3Api::class)
+//@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
@@ -57,7 +57,7 @@ fun LoginScreen(
                     // Guardar todos los datos del usuario en SharedPreferences
                     sharedPreferencesManager.saveAuthData(
                         token = it.token,
-                        userId = it.user.id.toString(), // Convertir Int/Long a String
+                        userId = it.user.id,
                         username = it.user.username,
                         userRole = it.user.role,
                         firstName = it.user.firstName,
@@ -69,7 +69,7 @@ fun LoginScreen(
                         dateOfBirth = it.user.dateOfBirth
                     )
 
-                    Toast.makeText(context, "¡Bienvenido, ${it.user.username}!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "¡Bienvenido/a, ${it.user.username}!", Toast.LENGTH_SHORT).show()
                     onLoginSuccess()
                 }
             }

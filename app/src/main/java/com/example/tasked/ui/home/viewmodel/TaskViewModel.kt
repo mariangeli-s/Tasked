@@ -23,8 +23,17 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
     private val _createTaskResult = MutableLiveData<Resource<Task>>()
     val createTaskResult: LiveData<Resource<Task>> = _createTaskResult
 
+    private val _assignTaskResult = MutableLiveData<Resource<Task>>()
+    val assignTaskResult: LiveData<Resource<Task>> = _assignTaskResult
+
+    private val _updateTaskResult = MutableLiveData<Resource<Task>>()
+    val updateTaskResult: LiveData<Resource<Task>> = _updateTaskResult
+
     private val _updateTaskStatusResult = MutableLiveData<Resource<Task>>()
     val updateTaskStatusResult: LiveData<Resource<Task>> = _updateTaskStatusResult
+
+    private val _deleteTaskResult = MutableLiveData<Resource<Unit>>()
+    val deleteTaskResult: LiveData<Resource<Unit>> = _deleteTaskResult
 
     private val _users = MutableLiveData<Resource<List<User>>>()
     val users: LiveData<Resource<List<User>>> = _users
@@ -61,7 +70,7 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
         }
     }
 
-    fun createTask(token: String, title: String, description: String, assignedTo: String?) {
+    fun createTask(token: String, title: String, description: String, assignedTo: Int?) {
         _createTaskResult.value = Resource.Loading()
         viewModelScope.launch {
             try {
@@ -117,6 +126,62 @@ class TaskViewModel(private val taskRepository: TaskRepository) : ViewModel() {
             }
         }
     }
+
+    fun assignTask(token: String, taskId: String, assignedToUserId: Int) {
+        _assignTaskResult.value = Resource.Loading()
+        viewModelScope.launch {
+            try {
+                val response = taskRepository.assignTask(token, taskId, assignedToUserId)
+                if (response.isSuccessful && response.body() != null) {
+                    _assignTaskResult.value = Resource.Success(response.body()!!)
+                    fetchMyTasks(token)
+                    fetchAssignedTasksByMe(token)
+                } else {
+                    _assignTaskResult.value = Resource.Error(response.message() ?: "Error al asignar tarea")
+                }
+            } catch (e: Exception) {
+                _assignTaskResult.value = Resource.Error("Error de red: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    fun deleteTask(token: String, taskId: String) {
+        _deleteTaskResult.value = Resource.Loading()
+        viewModelScope.launch {
+            try {
+                val response = taskRepository.deleteTask(token, taskId)
+                if (response.isSuccessful) {
+                    _deleteTaskResult.value = Resource.Success(Unit)
+                    fetchMyTasks(token)
+                    fetchAssignedTasksByMe(token)
+                } else {
+                    _deleteTaskResult.value = Resource.Error(response.message() ?: "Error al eliminar tarea")
+                }
+            } catch (e: Exception) {
+                _deleteTaskResult.value = Resource.Error("Error de red: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    // FUNCIÓN PARA EDICIÓN GENERAL DE TAREA
+    fun updateTask(token: String, taskId: String, title: String, description: String, assignedTo: Int) {
+        _updateTaskResult.value = Resource.Loading()
+        viewModelScope.launch {
+            try {
+                val response = taskRepository.updateTask(token, taskId, title, description, assignedTo)
+                if (response.isSuccessful && response.body() != null) {
+                    _updateTaskResult.value = Resource.Success(response.body()!!)
+                    fetchMyTasks(token)
+                    fetchAssignedTasksByMe(token)
+                } else {
+                    _updateTaskResult.value = Resource.Error(response.message() ?: "Error al actualizar tarea")
+                }
+            } catch (e: Exception) {
+                _updateTaskResult.value = Resource.Error("Error de red: ${e.localizedMessage}")
+            }
+        }
+    }
+
 }
 
 // Factory para TaskViewModel

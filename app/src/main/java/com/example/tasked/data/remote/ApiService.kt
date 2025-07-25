@@ -51,5 +51,26 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Path("taskId") taskId: String,
         @Body request: UpdateTaskStatusRequest
-    ): Response<Task> // Podría devolver la tarea actualizada o solo un éxito
+    ): Response<Task>
+
+    @PATCH("tasks/{taskId}/assign")
+    suspend fun assignTask(
+        @Header("Authorization") token: String,
+        @Path("taskId") taskId: String,
+        @Body request: AssignTaskRequest
+    ): Response<Task>
+
+    @DELETE("tasks/{taskId}")
+    suspend fun deleteTask(
+        @Header("Authorization") token: String,
+        @Path("taskId") taskId: String
+    ): Response<Unit>
+
+    @PUT("tasks/{taskId}")
+    suspend fun updateTask(
+        @Header("Authorization") token: String,
+        @Path("taskId") taskId: String,
+        @Body request: UpdateTaskRequest
+    ): Response<Task>
+
 }

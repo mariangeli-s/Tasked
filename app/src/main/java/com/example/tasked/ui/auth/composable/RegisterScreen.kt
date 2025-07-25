@@ -1,9 +1,10 @@
 package com.example.tasked.ui.auth.composable
 
-import android.app.DatePickerDialog
-import android.widget.DatePicker
+//import android.app.DatePickerDialog
+//import android.widget.DatePicker
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -35,6 +36,7 @@ import com.example.tasked.utils.SharedPreferencesManager
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import android.app.Activity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +47,7 @@ fun RegisterScreen(
     )
 ) {
     val context = LocalContext.current
+    //val activity = context as Activity
     val sharedPreferencesManager = remember { SharedPreferencesManager(context) }
 
     var username by remember { mutableStateOf("") }
@@ -57,35 +60,32 @@ fun RegisterScreen(
     var age by remember { mutableStateOf("") }
     var dateOfBirth by remember { mutableStateOf("") }
 
+    // Estado para controlar la visibilidad del DatePickerModal
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    // Log para depurar el cambio de estado de showDatePicker
+    LaunchedEffect(showDatePicker) {
+        Log.d("RegisterScreen", "showDatePicker changed to: $showDatePicker (from LaunchedEffect)")
+    }
+
     val registerResult by registerViewModel.registerResult.observeAsState()
 
     // Date Picker Dialog
-    val calendar = Calendar.getInstance()
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH)
-    val day = calendar.get(Calendar.DAY_OF_MONTH)
+    //val calendar = Calendar.getInstance()
+    //val year = calendar.get(Calendar.YEAR)
+    //val month = calendar.get(Calendar.MONTH)
+    //val day = calendar.get(Calendar.DAY_OF_MONTH)
 
-    val datePickerDialog = DatePickerDialog(
-        context,
-        { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDayOfMonth: Int ->
-            val selectedDate = Calendar.getInstance().apply {
-                set(selectedYear, selectedMonth, selectedDayOfMonth)
-            }
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            dateOfBirth = dateFormat.format(selectedDate.time)
-        }, year, month, day
-    )
 
     // Manejar el resultado del registro
     LaunchedEffect(registerResult) {
-        when (registerResult) { // Acceder al .value del Resource
+        when (registerResult) {
             is Resource.Success<*> -> {
                 val authResponse = (registerResult as Resource.Success).data
                 authResponse?.let {
-                    // *** CAMBIO CLAVE AQUÍ: Usar saveAuthData() unificado ***
                     sharedPreferencesManager.saveAuthData(
                         token = it.token,
-                        userId = it.user.id.toString(), // Convertir Int/Long a String
+                        userId = it.user.id,
                         username = it.user.username,
                         userRole = it.user.role,
                         firstName = it.user.firstName,
@@ -99,7 +99,7 @@ fun RegisterScreen(
 
                     Toast.makeText(
                         context,
-                        "¡Registro exitoso! Bienvenido, ${it.user.username}!",
+                        "¡Registro exitoso! Bienvenido/a, ${it.user.username}!",
                         Toast.LENGTH_SHORT
                     ).show()
                     onRegisterSuccess()
@@ -135,6 +135,7 @@ fun RegisterScreen(
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
+            // Fila 1: Nombre de usuario y Contraseña
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
@@ -152,83 +153,105 @@ fun RegisterScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
             )
 
-            OutlinedTextField(
-                value = firstName,
-                onValueChange = { firstName = it },
-                label = { Text("Nombre") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-            )
+            // Fila 2: Nombre y Apellido
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                OutlinedTextField(
+                    value = firstName,
+                    onValueChange = { firstName = it },
+                    label = { Text("Nombre") },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f).padding(end = 4.dp)
+                )
+                OutlinedTextField(
+                    value = lastName,
+                    onValueChange = { lastName = it },
+                    label = { Text("Apellido") },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f).padding(start = 4.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
-                value = lastName,
-                onValueChange = { lastName = it },
-                label = { Text("Apellido") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-            )
+            // Fila 3: Correo y Teléfono
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Correo") },
+                    leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Correo") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    singleLine = true,
+                    modifier = Modifier.weight(1f).padding(end = 4.dp)
+                )
+                OutlinedTextField(
+                    value = phone,
+                    onValueChange = { phone = it },
+                    label = { Text("Teléfono (66660000)") },
+                    leadingIcon = { Icon(Icons.Default.Phone, contentDescription = "Teléfono") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    singleLine = true,
+                    modifier = Modifier.weight(1f).padding(start = 4.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Correo") },
-                leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Correo") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-            )
+            // Fila 4: Dirección y Edad
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                OutlinedTextField(
+                    value = address,
+                    onValueChange = { address = it },
+                    label = { Text("Dirección") },
+                    leadingIcon = { Icon(Icons.Default.Home, contentDescription = "Dirección") },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f).padding(end = 4.dp)
+                )
+                OutlinedTextField(
+                    value = age,
+                    onValueChange = { newValue ->
+                        if (newValue.all { it.isDigit() } || newValue.isEmpty()) {
+                            age = newValue
+                        }
+                    },
+                    label = { Text("Edad") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    modifier = Modifier.weight(1f).padding(start = 4.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
-                value = phone,
-                onValueChange = { phone = it },
-                label = { Text("Teléfono") },
-                leadingIcon = { Icon(Icons.Default.Phone, contentDescription = "Teléfono") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-            )
-
-            OutlinedTextField(
-                value = address,
-                onValueChange = { address = it },
-                label = { Text("Dirección") },
-                leadingIcon = { Icon(Icons.Default.Home, contentDescription = "Dirección") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-            )
-
-            OutlinedTextField(
-                value = age,
-                onValueChange = { newValue ->
-                    if (newValue.all { it.isDigit() } || newValue.isEmpty()) {
-                        age = newValue
-                    }
-                },
-                label = { Text("Edad") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-            )
-
-            OutlinedTextField(
-                value = dateOfBirth,
-                onValueChange = { /* Read-only, handled by DatePickerDialog */ },
-                label = { Text("Fecha de Nacimiento (YYYY-MM-DD)") },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.DateRange,
-                        contentDescription = "Fecha de Nacimiento"
-                    )
-                },
-                readOnly = true,
+            // Fila 5: Fecha de Nacimiento
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 24.dp)
-                    .clickable { datePickerDialog.show() }
-            )
+                    .clickable {
+                        Log.d("RegisterScreen", "Clic detectado en campo Fecha de Nacimiento.")
+                        showDatePicker = true
+                    }
+            ) {
+                OutlinedTextField(
+                    value = dateOfBirth,
+                    onValueChange = { /* Read-only, handled by DatePickerModal */ },
+                    label = { Text("Fecha de Nacimiento (YYYY-MM-DD)") },
+                    leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = "Fecha de Nacimiento") },
+                    readOnly = true, // Sigue siendo de solo lectura
+                    enabled = false, // Deshabilita el campo para evitar interacción nativa del TextField
+                    modifier = Modifier.fillMaxWidth() // Asegura que el TextField ocupe el ancho completo del Box
+                )
+            }
 
             Button(
                 onClick = {
@@ -246,30 +269,71 @@ fun RegisterScreen(
                             dateOfBirth.ifEmpty { null }
                         )
                     } else {
-                        Toast.makeText(
-                            context,
-                            "Por favor, ingresa usuario, contraseña y correo (obligatorios)",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        Toast.makeText(context, "Por favor, ingresa usuario, contraseña y correo (obligatorios)", Toast.LENGTH_LONG).show()
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                enabled = registerResult !is Resource.Loading<*> // Acceder al .value
+                enabled = registerResult !is Resource.Loading<*>
             ) {
-                if (registerResult is Resource.Loading<*>) { // Acceder al .value
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(24.dp)
-                    )
+                if (registerResult is Resource.Loading<*>) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
                 } else {
                     Text("Registrarse", fontSize = 18.sp)
                 }
             }
         }
     }
+
+    // El DatePickerModal se muestra condicionalmente
+    if (showDatePicker) {
+        DatePickerModal(
+            onDateSelected = { millis ->
+                if (millis != null) {
+                    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    dateOfBirth = dateFormat.format(millis)
+                }
+                Log.d("RegisterScreen", "Date selected or dismissed. Setting showDatePicker = false")
+                showDatePicker = false // Cerrar el DatePicker
+            },
+            onDismiss = {
+                Log.d("RegisterScreen", "DatePicker dismissed. Setting showDatePicker = false")
+                showDatePicker = false
+            } // Cerrar el DatePicker al descartar
+        )
+    }
 }
+
+// El nuevo Composable DatePickerModal
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DatePickerModal(
+    onDateSelected: (Long?) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val datePickerState = rememberDatePickerState()
+
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                onDateSelected(datePickerState.selectedDateMillis)
+                onDismiss()
+            }) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    ) {
+        DatePicker(state = datePickerState)
+    }
+}
+
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

@@ -1,12 +1,12 @@
 package com.example.tasked.data.model
 
 data class User(
-    val id: String,
+    val id: Int,
     val username: String,
     val role: String, // "boss" o "employee"
     val firstName: String?, // Nuevo campo
     val lastName: String?, // Nuevo campo
-    val email: String, // Nuevo campo, asumiendo que es obligatorio
+    val email: String, // Nuevo campo
     val phone: String?, // Nuevo campo
     val address: String?, // Nuevo campo
     val age: Int?, // Nuevo campo

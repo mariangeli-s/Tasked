@@ -22,10 +22,10 @@ class SharedPreferencesManager(context: Context) {
         private const val KEY_DATE_OF_BIRTH = "dateOfBirth"
     }
 
-    // Esto es más limpio y garantiza que todos los campos relevantes se guarden al mismo tiempo.
+
     fun saveAuthData(
         token: String,
-        userId: String,
+        userId: Int,
         username: String,
         userRole: String,
         firstName: String? = null,
@@ -38,7 +38,7 @@ class SharedPreferencesManager(context: Context) {
     ) {
         prefs.edit().apply {
             putString(KEY_AUTH_TOKEN, token)
-            putString(KEY_USER_ID, userId)
+            putString(KEY_USER_ID, userId.toString())
             putString(KEY_USERNAME, username)
             putString(KEY_USER_ROLE, userRole)
             putString(KEY_FIRST_NAME, firstName)
@@ -63,8 +63,9 @@ class SharedPreferencesManager(context: Context) {
         return prefs.getString(KEY_USER_ROLE, null)
     }
 
-    fun getUserId(): String? {
-        return prefs.getString(KEY_USER_ID, null)
+    fun getUserId(): Int? {
+        val userIdString = prefs.getString(KEY_USER_ID, null)
+        return userIdString?.toIntOrNull() // Return the Int?
     }
 
     fun getUsername(): String? {

@@ -85,6 +85,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx.v283) // Para collectAsStateWithLifecycle
     implementation(libs.androidx.lifecycle.viewmodel.compose) // Para viewModels() en Composable
 
-
+    implementation(libs.accompanist.systemuicontroller)
+    implementation(libs.androidx.compose.material3.material3)
     // SharedPreferences (para guardar el token y rol localmente) - ya viene con Android, no necesita dependencia extra, pero la menciono para el concepto.
 }

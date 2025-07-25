@@ -8,13 +8,10 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    // Cambia esta URL por la URL base de tu API REST
-    // Si estás probando en un emulador, "10.0.2.2" apunta a tu máquina local.
-    // Si estás probando en un dispositivo físico, necesitas la IP de tu máquina en la red local.
-    private const val BASE_URL = "http://192.168.0.14:8000/api/v1/" // Ejemplo: ajusta el puerto y la ruta
+    private const val BASE_URL = "http://192.168.0.14:8000/api/v1/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY // Esto mostrará los detalles de la petición y respuesta en Logcat
+        level = HttpLoggingInterceptor.Level.BODY
     }
 
     private val okHttpClient = OkHttpClient.Builder()
