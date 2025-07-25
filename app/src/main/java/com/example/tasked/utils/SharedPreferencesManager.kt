@@ -13,94 +13,82 @@ class SharedPreferencesManager(context: Context) {
         private const val KEY_USER_ROLE = "userRole"
         private const val KEY_USER_ID = "userId"
         private const val KEY_USERNAME = "username"
-        private const val KEY_FIRST_NAME = "firstName" // Nuevo
-        private const val KEY_LAST_NAME = "lastName" // Nuevo
-        private const val KEY_EMAIL = "email" // Nuevo
-        private const val KEY_PHONE = "phone" // Nuevo
-        private const val KEY_ADDRESS = "address" // Nuevo
-        private const val KEY_AGE = "age" // Nuevo
-        private const val KEY_DATE_OF_BIRTH = "dateOfBirth" // Nuevo
+        private const val KEY_FIRST_NAME = "firstName"
+        private const val KEY_LAST_NAME = "lastName"
+        private const val KEY_EMAIL = "email"
+        private const val KEY_PHONE = "phone"
+        private const val KEY_ADDRESS = "address"
+        private const val KEY_AGE = "age"
+        private const val KEY_DATE_OF_BIRTH = "dateOfBirth"
     }
 
-    fun saveAuthToken(token: String) {
-        prefs.edit().putString(KEY_AUTH_TOKEN, token).apply()
+    // Esto es más limpio y garantiza que todos los campos relevantes se guarden al mismo tiempo.
+    fun saveAuthData(
+        token: String,
+        userId: String,
+        username: String,
+        userRole: String,
+        firstName: String? = null,
+        lastName: String? = null,
+        email: String? = null, // Email no puede ser null en el registro, pero para el guardar lo hacemos opcional
+        phone: String? = null,
+        address: String? = null,
+        age: Int? = null,
+        dateOfBirth: String? = null
+    ) {
+        prefs.edit().apply {
+            putString(KEY_AUTH_TOKEN, token)
+            putString(KEY_USER_ID, userId)
+            putString(KEY_USERNAME, username)
+            putString(KEY_USER_ROLE, userRole)
+            putString(KEY_FIRST_NAME, firstName)
+            putString(KEY_LAST_NAME, lastName)
+            putString(KEY_EMAIL, email)
+            putString(KEY_PHONE, phone)
+            putString(KEY_ADDRESS, address)
+            // Para Int?, necesitamos un manejo específico para guardar null
+            if (age != null) putInt(KEY_AGE, age) else remove(KEY_AGE)
+            putString(KEY_DATE_OF_BIRTH, dateOfBirth)
+            apply()
+        }
     }
 
+
+    // Métodos individuales para obtener datos (estos están bien)
     fun getAuthToken(): String? {
         return prefs.getString(KEY_AUTH_TOKEN, null)
-    }
-
-    fun saveUserRole(role: String) {
-        prefs.edit().putString(KEY_USER_ROLE, role).apply()
     }
 
     fun getUserRole(): String? {
         return prefs.getString(KEY_USER_ROLE, null)
     }
 
-    fun saveUserId(userId: String) {
-        prefs.edit().putString(KEY_USER_ID, userId).apply()
-    }
-
     fun getUserId(): String? {
         return prefs.getString(KEY_USER_ID, null)
-    }
-
-    fun saveUsername(username: String) {
-        prefs.edit().putString(KEY_USERNAME, username).apply()
     }
 
     fun getUsername(): String? {
         return prefs.getString(KEY_USERNAME, null)
     }
 
-    // Nuevos métodos para guardar información adicional del usuario
-    fun saveFirstName(firstName: String?) {
-        prefs.edit().putString(KEY_FIRST_NAME, firstName).apply()
-    }
-
     fun getFirstName(): String? {
         return prefs.getString(KEY_FIRST_NAME, null)
-    }
-
-    fun saveLastName(lastName: String?) {
-        prefs.edit().putString(KEY_LAST_NAME, lastName).apply()
     }
 
     fun getLastName(): String? {
         return prefs.getString(KEY_LAST_NAME, null)
     }
 
-    fun saveEmail(email: String) {
-        prefs.edit().putString(KEY_EMAIL, email).apply()
-    }
-
     fun getEmail(): String? {
         return prefs.getString(KEY_EMAIL, null)
-    }
-
-    fun savePhone(phone: String?) {
-        prefs.edit().putString(KEY_PHONE, phone).apply()
     }
 
     fun getPhone(): String? {
         return prefs.getString(KEY_PHONE, null)
     }
 
-    fun saveAddress(address: String?) {
-        prefs.edit().putString(KEY_ADDRESS, address).apply()
-    }
-
     fun getAddress(): String? {
         return prefs.getString(KEY_ADDRESS, null)
-    }
-
-    fun saveAge(age: Int?) {
-        if (age != null) {
-            prefs.edit().putInt(KEY_AGE, age).apply()
-        } else {
-            prefs.edit().remove(KEY_AGE).apply()
-        }
     }
 
     fun getAge(): Int? {
@@ -108,31 +96,21 @@ class SharedPreferencesManager(context: Context) {
         return if (age != -1) age else null
     }
 
-    fun saveDateOfBirth(dateOfBirth: String?) {
-        prefs.edit().putString(KEY_DATE_OF_BIRTH, dateOfBirth).apply()
-    }
-
     fun getDateOfBirth(): String? {
         return prefs.getString(KEY_DATE_OF_BIRTH, null)
     }
 
-    fun clearAuthData() {
-        prefs.edit()
-            .remove(KEY_AUTH_TOKEN)
-            .remove(KEY_USER_ROLE)
-            .remove(KEY_USER_ID)
-            .remove(KEY_USERNAME)
-            .remove(KEY_FIRST_NAME) // Nuevo
-            .remove(KEY_LAST_NAME) // Nuevo
-            .remove(KEY_EMAIL) // Nuevo
-            .remove(KEY_PHONE) // Nuevo
-            .remove(KEY_ADDRESS) // Nuevo
-            .remove(KEY_AGE) // Nuevo
-            .remove(KEY_DATE_OF_BIRTH) // Nuevo
-            .apply()
+
+    // ¡FUNCIÓN CORREGIDA! Verifica todos los campos esenciales para que la sesión sea válida
+    fun isLoggedIn(): Boolean {
+        return getAuthToken() != null &&
+                getUserId() != null &&
+                getUsername() != null &&
+                getUserRole() != null // Agregué estas verificaciones.
     }
 
-    fun isLoggedIn(): Boolean {
-        return getAuthToken() != null && getUserRole() != null
+    // Función para limpiar todos los datos de autenticación y perfil
+    fun clearAuthData() {
+        prefs.edit().clear().apply() // .clear() es más eficiente que remover uno por uno
     }
 }

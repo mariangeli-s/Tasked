@@ -25,6 +25,10 @@ import com.example.tasked.ui.auth.viewmodel.LoginViewModel
 import com.example.tasked.ui.auth.viewmodel.LoginViewModelFactory
 import com.example.tasked.ui.theme.TaskedTheme
 import com.example.tasked.utils.Resource
+import com.example.tasked.utils.SharedPreferencesManager
+//import android.app.Activity
+//import android.content.Intent
+//import com.example.tasked.ui.home.MainActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,28 +40,51 @@ fun LoginScreen(
     )
 ) {
     val context = LocalContext.current
+    val sharedPreferencesManager = remember { SharedPreferencesManager(context) } // Inicializa SharedPreferencesManager
+
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     val loginResult by loginViewModel.loginResult.observeAsState()
 
     // Manejar el resultado del login
-
-    // Manejar el resultado del login
     LaunchedEffect(loginResult) {
-        when (loginResult) {
-            is Resource.Success -> {
-                Toast.makeText(context, "¡Bienvenido!", Toast.LENGTH_SHORT).show()
-                onLoginSuccess()
+        val result = loginResult // Obtener el valor actual del Resource
+        when (result) {
+            is Resource.Success<*> -> {
+                val authResponse = (result as Resource.Success).data
+                authResponse?.let {
+                    // Guardar todos los datos del usuario en SharedPreferences
+                    sharedPreferencesManager.saveAuthData(
+                        token = it.token,
+                        userId = it.user.id.toString(), // Convertir Int/Long a String
+                        username = it.user.username,
+                        userRole = it.user.role,
+                        firstName = it.user.firstName,
+                        lastName = it.user.lastName,
+                        email = it.user.email,
+                        phone = it.user.phone,
+                        address = it.user.address,
+                        age = it.user.age,
+                        dateOfBirth = it.user.dateOfBirth
+                    )
+
+                    Toast.makeText(context, "¡Bienvenido, ${it.user.username}!", Toast.LENGTH_SHORT).show()
+                    onLoginSuccess()
+                }
             }
-            is Resource.Error -> {
-                val errorMessage = loginResult?.message ?: "Error desconocido"
-                Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+            is Resource.Error<*> -> {
+                val errorMessage = result.message ?: "Error desconocido"
+                Toast.makeText(context, "Error de login: $errorMessage", Toast.LENGTH_LONG).show()
             }
-            else -> {} // Loading o null
+            is Resource.Loading<*> -> {
+                // Estado de carga, no hacemos nada aquí visiblemente, el botón ya está deshabilitado
+            }
+            null -> {
+                // Estado inicial, no hacemos nada
+            }
         }
     }
-
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background

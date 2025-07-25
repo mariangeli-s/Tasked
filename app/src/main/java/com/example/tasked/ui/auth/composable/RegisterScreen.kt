@@ -11,7 +11,6 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lock
-//import androidx.compose.material.icons.filled.
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
@@ -46,17 +45,17 @@ fun RegisterScreen(
     )
 ) {
     val context = LocalContext.current
-    val sharedPreferencesManager = remember { SharedPreferencesManager(context) } // Para guardar datos después del registro
+    val sharedPreferencesManager = remember { SharedPreferencesManager(context) }
 
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var firstName by remember { mutableStateOf("") } // Nuevo
-    var lastName by remember { mutableStateOf("") } // Nuevo
-    var email by remember { mutableStateOf("") } // Nuevo
-    var phone by remember { mutableStateOf("") } // Nuevo
-    var address by remember { mutableStateOf("") } // Nuevo
-    var age by remember { mutableStateOf("") } // Nuevo (como String para TextField)
-    var dateOfBirth by remember { mutableStateOf("") } // Nuevo
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+    var address by remember { mutableStateOf("") }
+    var age by remember { mutableStateOf("") }
+    var dateOfBirth by remember { mutableStateOf("") }
 
     val registerResult by registerViewModel.registerResult.observeAsState()
 
@@ -79,32 +78,41 @@ fun RegisterScreen(
 
     // Manejar el resultado del registro
     LaunchedEffect(registerResult) {
-        when (registerResult) {
+        when (registerResult) { // Acceder al .value del Resource
             is Resource.Success<*> -> {
                 val authResponse = (registerResult as Resource.Success).data
                 authResponse?.let {
-                    // Guardar todos los datos del usuario en SharedPreferences
-                    sharedPreferencesManager.saveAuthToken(it.token)
-                    sharedPreferencesManager.saveUserRole(it.user.role)
-                    sharedPreferencesManager.saveUserId(it.user.id)
-                    sharedPreferencesManager.saveUsername(it.user.username)
-                    sharedPreferencesManager.saveFirstName(it.user.firstName) // Guardar nuevo campo
-                    sharedPreferencesManager.saveLastName(it.user.lastName) // Guardar nuevo campo
-                    sharedPreferencesManager.saveEmail(it.user.email) // Guardar nuevo campo
-                    sharedPreferencesManager.savePhone(it.user.phone) // Guardar nuevo campo
-                    sharedPreferencesManager.saveAddress(it.user.address) // Guardar nuevo campo
-                    sharedPreferencesManager.saveAge(it.user.age) // Guardar nuevo campo
-                    sharedPreferencesManager.saveDateOfBirth(it.user.dateOfBirth) // Guardar nuevo campo
+                    // *** CAMBIO CLAVE AQUÍ: Usar saveAuthData() unificado ***
+                    sharedPreferencesManager.saveAuthData(
+                        token = it.token,
+                        userId = it.user.id.toString(), // Convertir Int/Long a String
+                        username = it.user.username,
+                        userRole = it.user.role,
+                        firstName = it.user.firstName,
+                        lastName = it.user.lastName,
+                        email = it.user.email,
+                        phone = it.user.phone,
+                        address = it.user.address,
+                        age = it.user.age, // int?
+                        dateOfBirth = it.user.dateOfBirth // string?
+                    )
 
-                    Toast.makeText(context, "¡Registro exitoso! Bienvenido, ${it.user.username}!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "¡Registro exitoso! Bienvenido, ${it.user.username}!",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     onRegisterSuccess()
                 }
             }
+
             is Resource.Error<*> -> {
                 val errorMessage = registerResult?.message ?: "Error desconocido"
                 Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
             }
-            else -> {} // Loading o null
+
+            is Resource.Loading<*> -> {} // Estado de carga
+            null -> {} // Estado inicial
         }
     }
 
@@ -200,7 +208,6 @@ fun RegisterScreen(
                     }
                 },
                 label = { Text("Edad") },
-                //leadingIcon = { Icon(Icons.Default.Numbers, contentDescription = "Edad") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
@@ -210,22 +217,27 @@ fun RegisterScreen(
                 value = dateOfBirth,
                 onValueChange = { /* Read-only, handled by DatePickerDialog */ },
                 label = { Text("Fecha de Nacimiento (YYYY-MM-DD)") },
-                leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = "Fecha de Nacimiento") },
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.DateRange,
+                        contentDescription = "Fecha de Nacimiento"
+                    )
+                },
                 readOnly = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 24.dp)
-                    .clickable { datePickerDialog.show() } // Abre el DatePicker al hacer clic
+                    .clickable { datePickerDialog.show() }
             )
 
             Button(
                 onClick = {
-                    val parsedAge = age.toIntOrNull() // Convertir la edad a Int
+                    val parsedAge = age.toIntOrNull()
                     if (username.isNotEmpty() && password.isNotEmpty() && email.isNotEmpty()) {
                         registerViewModel.register(
                             username,
                             password,
-                            firstName.ifEmpty { null }, // Enviar null si está vacío
+                            firstName.ifEmpty { null },
                             lastName.ifEmpty { null },
                             email,
                             phone.ifEmpty { null },
@@ -234,16 +246,23 @@ fun RegisterScreen(
                             dateOfBirth.ifEmpty { null }
                         )
                     } else {
-                        Toast.makeText(context, "Por favor, ingresa usuario, contraseña y correo (obligatorios)", Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            context,
+                            "Por favor, ingresa usuario, contraseña y correo (obligatorios)",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                enabled = registerResult !is Resource.Loading<*>
+                enabled = registerResult !is Resource.Loading<*> // Acceder al .value
             ) {
-                if (registerResult is Resource.Loading<*>) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
+                if (registerResult is Resource.Loading<*>) { // Acceder al .value
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(24.dp)
+                    )
                 } else {
                     Text("Registrarse", fontSize = 18.sp)
                 }

@@ -123,6 +123,5 @@ sealed class MainAppScreen {
 @Composable
 fun GreetingPreview() {
     TaskedTheme {
-
     }
 }
