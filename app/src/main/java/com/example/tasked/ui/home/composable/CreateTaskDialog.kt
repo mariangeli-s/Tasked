@@ -43,7 +43,7 @@ fun CreateTaskDialog(
 
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var assignedToUserId: String? by remember { mutableStateOf(null) } // ID del usuario asignado
+    var assignedToUserId: Int? by remember { mutableStateOf(null) } // Cambiado a Int?
     var assignedToUsername: String? by remember { mutableStateOf(null) } // Nombre del usuario asignado para mostrar
 
     val createTaskResult by taskViewModel.createTaskResult.observeAsState()
@@ -207,6 +207,7 @@ fun CreateTaskDialog(
                 Button(
                     onClick = {
                         if (title.isNotEmpty() && description.isNotEmpty()) {
+                            // Pasar directamente assignedToUserId como Int?
                             taskViewModel.createTask(authToken, title, description, assignedToUserId)
                         } else {
                             Toast.makeText(context, "Por favor, completa título y descripción", Toast.LENGTH_SHORT).show()

@@ -43,8 +43,9 @@ fun EditTaskDialog(
 
     var title by remember { mutableStateOf(taskToEdit.title) }
     var description by remember { mutableStateOf(taskToEdit.description) }
-    var assignedToUserId: Int by remember { mutableStateOf(taskToEdit.assignedTo) }
-    var assignedToUsername: String? by remember { mutableStateOf(taskToEdit.assignee) }
+    // Cambiar para usar el nuevo modelo de Task
+    var assignedToUserId: Int? by remember { mutableStateOf(taskToEdit.assignedTo) }
+    var assignedToUsername: String? by remember { mutableStateOf(taskToEdit.assigneeName) }
 
     val updateTaskResult by taskViewModel.updateTaskResult.observeAsState()
     val usersResource by taskViewModel.users.observeAsState()
@@ -53,6 +54,20 @@ fun EditTaskDialog(
     LaunchedEffect(isBoss, authToken) {
         if (isBoss && authToken.isNotEmpty()) {
             taskViewModel.fetchUsers(authToken)
+        }
+    }
+
+    // Actualizar el nombre del usuario asignado cuando se cargan los usuarios
+    LaunchedEffect(usersResource, assignedToUserId) {
+        if (usersResource is Resource.Success<*> && assignedToUserId != null) {
+            val users = (usersResource as Resource.Success).data ?: emptyList()
+            val assignedUser = users.find { it.id == assignedToUserId }
+            if (assignedUser != null) {
+                assignedToUsername = assignedUser.username
+            }
+        } else if (assignedToUserId == null) {
+            // Si no hay usuario asignado, usar el valor inicial del modelo
+            assignedToUsername = taskToEdit.assigneeName
         }
     }
 
@@ -118,10 +133,10 @@ fun EditTaskDialog(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
-                    when (usersResource) {
+                    when (val currentUsersResource = usersResource) {
                         is Resource.Loading<*> -> CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                         is Resource.Success<*> -> {
-                            val users = (usersResource as Resource.Success).data ?: emptyList()
+                            val users = currentUsersResource.data ?: emptyList()
 
                             Row(
                                 Modifier
@@ -196,7 +211,7 @@ fun EditTaskDialog(
                             )
 
                         }
-                        is Resource.Error<*> -> Text("Error al cargar usuarios: ${usersResource.message}", color = MaterialTheme.colorScheme.error)
+                        is Resource.Error<*> -> Text("Error al cargar usuarios: ${currentUsersResource.message}", color = MaterialTheme.colorScheme.error)
                         null -> Text("Cargando usuarios...")
                     }
                 }
@@ -205,7 +220,9 @@ fun EditTaskDialog(
                     onClick = {
                         if (title.isNotEmpty() && description.isNotEmpty()) {
                             if (authToken.isNotEmpty()) {
-                                taskViewModel.updateTask(authToken, taskToEdit.id.toString(), title, description, assignedToUserId)
+                                // Manejar el caso cuando assignedToUserId puede ser null
+                                val assignedTo = assignedToUserId ?: 0 // Usar 0 como valor por defecto o ajusta según tu API
+                                taskViewModel.updateTask(authToken, taskToEdit.id.toString(), title, description, assignedTo)
                             } else {
                                 Toast.makeText(context, "Token de autenticación no encontrado.", Toast.LENGTH_SHORT).show()
                             }

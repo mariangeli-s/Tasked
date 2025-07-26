@@ -6,8 +6,8 @@ data class Task(
     val description: String,
     val createdBy: Int?, // ID del usuario que creó la tarea
     val assignedTo: Int?, // ID del usuario asignado (null si es personal)
-    val creator: String, // Nombre del usuario que creó la tarea
-    val assignee: String?, // Nombre del usuario asignado (null si es personal)
+    val creator: User?, // Nombre del usuario que creó la tarea
+    val assignee: User?, // Nombre del usuario asignado (null si es personal)
     val status: String // Ej: "pending", "completed"
 )
 
